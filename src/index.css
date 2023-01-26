@@ -35,10 +35,12 @@
 @import url(./blocks/popup/__content/popup__content.css);
 @import url(./blocks/popup/__content-image/popup__content-image.css);
 @import url(./blocks/popup/__image/popup__image.css);
+@import url(./blocks/popup/__image-tooltip/popup__image-tooltip.css);
 @import url(./blocks/popup/__text/popup__text.css);
 @import url(./blocks/popup/__close/popup__close.css);
 @import url(./blocks/popup/__title/popup__title.css);
 @import url(./blocks/popup/__title-delete/popup__title-delete.css);
+@import url(./blocks/popup/__title-tooltip/popup__title-tooltip.css);
 @import url(./blocks/popup-form/popup-form.css);
 @import url(./blocks/popup-form/__field/popup-form__field.css);
 @import url(./blocks/popup-form/__input/popup-form__input.css);
