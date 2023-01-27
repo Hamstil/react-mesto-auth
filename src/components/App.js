@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Switch, Route, Redirect } from 'react-router-dom';
 import CurrentUserContext from "../contexts/CurrentUserContext";
 import api from "../utils/Api";
 import Header from "./Header";
@@ -10,6 +11,9 @@ import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
 import DeletePopup from "./DeletePopup";
+import Register from "./Register"
+import Login from "./Login"
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -22,6 +26,7 @@ function App() {
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // Получение данных Профиля из запроса
   useEffect(() => {
@@ -153,18 +158,35 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <div className="page">
+      <div className="page">        
         <Header />
-        <Main
-          onEditAvatar={handleEditAvatarClick}
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onDeleteCard={handleDeleteClick}
-          onCardClick={handleCardClick}
-          onCardLike={handleCardLike}
-          onCardDelete={handleDeleteClick}
-          cards={cards}
-        />
+
+        <Switch>
+          <ProtectedRoute 
+            exact 
+            path="/"
+            component={Main}
+            isLoggedIn={isLoggedIn}
+            onEditAvatar={handleEditAvatarClick}
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onDeleteCard={handleDeleteClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleDeleteClick}
+            cards={cards}
+          />
+          <Route path="/sign-up">
+            <Register isLoggedIn={isLoggedIn} />
+          </Route>
+          <Route path="/sign-in">
+            <Login isLoggedIn={isLoggedIn} />
+          </Route>
+          <Route path="*">
+            {isLoggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
+          </Route>
+        </Switch> 
+
         <Footer />
 
         <EditAvatarPopup
