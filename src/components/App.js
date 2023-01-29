@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Switch, Route, Redirect } from 'react-router-dom';
 import CurrentUserContext from "../contexts/CurrentUserContext";
 import api from "../utils/Api";
@@ -14,6 +14,7 @@ import DeletePopup from "./DeletePopup";
 import Register from "./Register"
 import Login from "./Login"
 import ProtectedRoute from "./ProtectedRoute";
+import {regitration, login, getEmail} from "../utils/auth";
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -26,21 +27,26 @@ function App() {
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
-  // Получение данных Профиля из запроса
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [emailUser, setEmailUser] = useState('');
+  
+  
+ // Получение данных Профиля из запроса
   useEffect(() => {
-    api
+    if (isLoggedIn) {
+      api
       .getUserInfo()
       .then((data) => {
         setCurrentUser(data);
       })
       .catch((err) => console.log(err));
-  }, []);
+    }  
+  }, [isLoggedIn]);
 
   // Получение карточек из запроса
   useEffect(() => {
-    api
+    if (isLoggedIn) {
+        api
       .getInitialCards()
       .then((data) => {
         setCards(data);
@@ -48,7 +54,58 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
+    }  
+  }, [isLoggedIn]);
+
+   // метод проверки токена
+   const tokenCheck = useCallback(() => {
+    setIsLoading(true);
+    let jwt = localStorage.getItem('token');
+    if (jwt) {
+      getEmail(jwt).then((res) => {
+        if (res) {
+          setIsLoggedIn(true);
+          setEmailUser(res.data.email);                             
+        }
+      }).catch((err) => console.log(`Ошибка: ${err}`))
+        .finally(() => setIsLoading(false));
+    }
   }, []);
+
+  // Проверка токена при монтировании компонента App
+  useEffect(() => {
+    tokenCheck();
+  }, [tokenCheck]);
+
+   // метод логина
+   const handleLogin = useCallback((password, email) => {
+    setIsLoading(true);
+    login(password, email).then((data) => {
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        setIsLoggedIn(true);
+        setEmailUser(email); 
+      }
+    }).catch(() => {setIsInfoTooltipPopupOpen('fail')})
+    .finally(() => setIsLoading(false));
+  }, []);
+
+  // метод регистрации 
+  const handleRegister = useCallback((password, email) => {
+    setIsLoading(true);
+    regitration(password, email).then((res) => {      
+      setIsInfoTooltipPopupOpen('success');
+    }).catch((err) => {console.log(err)})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+ // метод разлогинивания
+ const handleLogout = useCallback(() => {
+  setIsLoggedIn(false);
+  localStorage.removeItem('token');
+  setEmailUser('');
+ }, []);
+
 
   // Функция добавления и удаление лайков через api
   function handleCardLike(card) {
@@ -154,19 +211,19 @@ function App() {
     setIsDeletePopupOpen(false);
     setIsImagePopupOpen(false);
     setIsInfoTooltipPopupOpen('');
-  }
+  }  
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">        
-        <Header />
+        <Header emailUser={emailUser} handleLogout={handleLogout} />
 
-        <Switch>
+        <Switch>                    
           <ProtectedRoute 
             exact 
             path="/"
             component={Main}
-            isLoggedIn={isLoggedIn}
+            isLoggedIn={isLoggedIn}            
             onEditAvatar={handleEditAvatarClick}
             onEditProfile={handleEditProfileClick}
             onAddPlace={handleAddPlaceClick}
@@ -175,15 +232,15 @@ function App() {
             onCardLike={handleCardLike}
             onCardDelete={handleDeleteClick}
             cards={cards}
-          />
+          />         
           <Route path="/sign-up">
-            <Register isLoggedIn={isLoggedIn} />
+            <Register isLoggedIn={isLoggedIn} handleRegister={handleRegister}  />
           </Route>
           <Route path="/sign-in">
-            <Login isLoggedIn={isLoggedIn} />
+            <Login isLoggedIn={isLoggedIn} handleLogin={handleLogin} emailUser={emailUser}  />
           </Route>
           <Route path="*">
-            {isLoggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
+              {isLoggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
           </Route>
         </Switch> 
 

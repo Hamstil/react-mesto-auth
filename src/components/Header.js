@@ -2,15 +2,15 @@ import React from "react";
 import headerLogo from "../images/logo.svg";
 import { Link, Switch, Route } from "react-router-dom";
 
-function Header() {
+function Header({emailUser, handleLogout}) {
   return (
     <header className="header page__header">
       <img src={headerLogo} alt="Логотип: Mesto" className="header__logo" />
       <Switch>
         <Route exact path="/">
           <div className="header__block-user">
-            <p className="header__email">test@test.ru</p>
-            <Link to="/sign-in" className="header__link header__link_dark">Выйти</Link>
+            <p className="header__email">{emailUser}</p>
+            <Link to="/sign-in" className="header__link header__link_dark" onClick={handleLogout}>Выйти</Link>
           </div>
         </Route>
         <Route path="/sign-up">
