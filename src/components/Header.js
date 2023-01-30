@@ -1,26 +1,70 @@
-import React from "react";
+import React, { useState } from "react";
 import headerLogo from "../images/logo.svg";
 import { Link, Switch, Route } from "react-router-dom";
 
-function Header({emailUser, handleLogout}) {
+function Header({ emailUser, handleLogout }) {
+  // стейс переключателя
+  const [toggler, setToggler] = useState(true);
+
+  // метод переключателя
+  const handleToggle = () => {
+    toggler ? setToggler(false) : setToggler(true);
+  };
+
   return (
-    <header className="header page__header">
-      <img src={headerLogo} alt="Логотип: Mesto" className="header__logo" />
-      <Switch>
-        <Route exact path="/">
-          <div className="header__block-user">
-            <p className="header__email">{emailUser}</p>
-            <Link to="/sign-in" className="header__link header__link_dark" onClick={handleLogout}>Выйти</Link>
+    <>
+      {emailUser ? (
+        <>
+          <div className={toggler ? "header-menu_hide" : "header-menu"}>
+            <p className="header-menu__email">{emailUser}</p>
+            <Link
+              to="/sign-in"
+              className="header-menu__link header-menu__link_dark"
+              onClick={handleLogout}
+            >
+              Выйти
+            </Link>
           </div>
-        </Route>
-        <Route path="/sign-up">
-          <Link className="header__link" to="/sign-in">Войти</Link>
-        </Route>
-        <Route path="/sign-in">
-          <Link className="header__link" to="/sign-up">Регистрация</Link>
-        </Route>
-      </Switch>
-    </header>
+        </>
+      ) : (
+        ""
+      )}
+      <header className="header page__header">
+        <img src={headerLogo} alt="Логотип: Mesto" className="header__logo" />
+        <Switch>
+          <Route exact path="/">
+            <div className="header__block-user">
+              <p className="header__email">{emailUser}</p>
+              <Link
+                to="/sign-in"
+                className="header__link header__link_dark"
+                onClick={handleLogout}
+              >
+                Выйти
+              </Link>
+            </div>
+            <button
+              onClick={handleToggle}
+              aria-label="Открыть и закрытие меню пользователя"
+              type="button"
+              className={`${
+                toggler ? "header__menu-burger" : "header__menu-close"
+              }`}
+            ></button>
+          </Route>
+          <Route path="/sign-up">
+            <Link className="header__link" to="/sign-in">
+              Войти
+            </Link>
+          </Route>
+          <Route path="/sign-in">
+            <Link className="header__link" to="/sign-up">
+              Регистрация
+            </Link>
+          </Route>
+        </Switch>
+      </header>
+    </>
   );
 }
 
