@@ -4,18 +4,20 @@ import { Link, Switch, Route } from "react-router-dom";
 
 function Header({ emailUser, handleLogout }) {
   // стейс переключателя
-  const [toggler, setToggler] = useState(true);
+  const [toggleBurgerMenu, setToggleBurgerMenu] = useState(true);
 
   // метод переключателя
   const handleToggle = () => {
-    toggler ? setToggler(false) : setToggler(true);
+    setToggleBurgerMenu(!toggleBurgerMenu);
   };
 
   return (
     <>
       {emailUser ? (
         <>
-          <div className={toggler ? "header-menu_hide" : "header-menu"}>
+          <div
+            className={toggleBurgerMenu ? "header-menu_hide" : "header-menu"}
+          >
             <p className="header-menu__email">{emailUser}</p>
             <Link
               to="/sign-in"
@@ -48,7 +50,7 @@ function Header({ emailUser, handleLogout }) {
               aria-label="Открыть и закрытие меню пользователя"
               type="button"
               className={`${
-                toggler ? "header__menu-burger" : "header__menu-close"
+                toggleBurgerMenu ? "header__menu-burger" : "header__menu-close"
               }`}
             ></button>
           </Route>

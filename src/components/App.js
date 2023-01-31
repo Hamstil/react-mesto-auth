@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route, Redirect, useHistory } from "react-router-dom";
 import CurrentUserContext from "../contexts/CurrentUserContext";
 import api from "../utils/Api";
 import Header from "./Header";
@@ -29,30 +29,18 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [emailUser, setEmailUser] = useState("");
+  const history = useHistory();
 
-  // Получение данных Профиля из запроса
+  // Получение данных о пользователе и карточках
   useEffect(() => {
     if (isLoggedIn) {
       api
-        .getUserInfo()
-        .then((data) => {
-          setCurrentUser(data);
+        .getAllInfo()
+        .then(([user, cards]) => {
+          setCurrentUser(user);
+          setCards(cards);
         })
         .catch((err) => console.log(err));
-    }
-  }, [isLoggedIn]);
-
-  // Получение карточек из запроса
-  useEffect(() => {
-    if (isLoggedIn) {
-      api
-        .getInitialCards()
-        .then((data) => {
-          setCards(data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
     }
   }, [isLoggedIn]);
 
@@ -96,18 +84,22 @@ function App() {
   }, []);
 
   // метод регистрации
-  const handleRegister = useCallback((password, email) => {
-    setIsLoading(true);
-    regitration(password, email)
-      .then((res) => {
-        setIsInfoTooltipPopupOpen("success");
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsInfoTooltipPopupOpen("fail");
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const handleRegister = useCallback(
+    (password, email) => {
+      setIsLoading(true);
+      regitration(password, email)
+        .then((res) => {
+          setIsInfoTooltipPopupOpen("success");
+          history.push("/sign-in");
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsInfoTooltipPopupOpen("fail");
+        })
+        .finally(() => setIsLoading(false));
+    },
+    [history]
+  );
 
   // метод разлогинивания
   const handleLogout = useCallback(() => {
